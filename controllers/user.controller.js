@@ -1,4 +1,4 @@
-const { updateUserMetadata } = require('../utils/auth.config');
+const { updateUserMetadata, getUserMetadata } = require('../utils/auth.config');
 
 var axios = require('axios').default;
 exports.updateProfile = async (req, res, next) => {
@@ -14,6 +14,20 @@ exports.updateProfile = async (req, res, next) => {
 		.catch((err) => {
 			console.log(err);
 		});
+};
+
+exports.getProfile = (req, res, next) => {
+	const { user_id } = req.body;
+	getUserMetadata(user_id)
+		.then((user) => {
+			res.json({
+				success: true,
+				user: user,
+			});
+		})
+		.catch((err) => {
+			console.log(err);
+		});	
 };
 
 exports.postAppointment = (req, res, next) => {};

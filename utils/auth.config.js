@@ -99,6 +99,33 @@ exports.updateUserMetadata = (user_id, metadata) => {
   });
 };
 
+exports.getUserMetadata = (user_id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const mgmtTkn = await getMgmtAccessToken();
+      var options = {
+        method: "GET",
+        url: `https://${authConfig.domain}/api/v2/users/${user_id}`,
+        headers: {
+          authorization: `Bearer ${mgmtTkn.access_token}`,
+          "content-type": "application/json",
+        },
+      };
+
+      axios
+        .request(options)
+        .then(function (response) {
+          resolve(response.data);
+        })
+        .catch(function (error) {
+          reject(error);
+        });
+    } catch (err) {
+      console.log(err);
+    }
+  });
+};
+
 const updateUserTags = (user_id, mgmtTkn, roles) => {
   return new Promise((resolve, reject) => {
     var options = {
