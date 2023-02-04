@@ -1,4 +1,4 @@
-const { updateUserMetadata, getUserMetadata } = require('../utils/auth.config');
+const { updateUserMetadata, getUserMetadata, createUser, signInUser, signOutUser } = require('../utils/auth.config');
 
 var axios = require('axios').default;
 exports.updateProfile = async (req, res, next) => {
@@ -27,10 +27,54 @@ exports.getProfile = (req, res, next) => {
 		})
 		.catch((err) => {
 			console.log(err);
-		});	
+		}
+	);	
 };
 
-export.
+exports.signUp = (req, res, next) => {
+	  const { email, password, role } = req.body;
+	  createUser(email, password, role)
+	    .then((user) => {
+			res.json({
+				success: true,
+				user: user,
+			});
+		})
+		.catch((err) => {
+			console.log(err);
+		}
+	);
+};
+
+exports.signIn = (req, res, next) => {
+	const { email, password } = req.body;
+	signInUser(email, password)
+		.then((user) => {
+			res.json({
+				success: true,
+				user: user,
+			});
+		})
+		.catch((err) => {
+			console.log(err);
+		}
+	);
+};
+
+exports.signOut = (req, res, next) => {
+	const { refreshToken } = req.body;
+	signOutUser(refreshToken)
+		.then((user) => {
+			res.json({
+				success: true,
+				user: user,
+			});
+		})
+		.catch((err) => {
+			console.log(err);
+		}
+	);
+};
 
 exports.postAppointment = (req, res, next) => {};
 

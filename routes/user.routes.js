@@ -5,4 +5,5 @@ const router = require('express').Router();
 router.put('/profile', updateProfile);
 router.get('/profile', authorizeAccessToken, getProfile);
 
+
 module.exports = router;

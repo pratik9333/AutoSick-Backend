@@ -149,3 +149,103 @@ const updateUserTags = (user_id, mgmtTkn, roles) => {
       });
   });
 };
+
+exports.createUser = (user_id, email, role) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const mgmtTkn = await getMgmtAccessToken();
+      var options = {
+        method: "POST",
+        url: `https://${authConfig.domain}/api/v2/users`,
+        headers: {
+          "content-type": "application/json",
+          authorization: `Bearer ${mgmtTkn.access_token}`,
+          "cache-control": "no-cache",
+        },
+        data: {
+          connection: "Username-Password-Authentication",
+          email: email,
+          password: "password",
+          user_metadata: {
+            role: role,
+          },
+          app_metadata: {
+            role: role,
+          },
+          user_id: user_id,
+        },
+      };
+
+      axios
+        .request(options)
+        .then(function (response) {
+          resolve(response.data);
+        })
+        .catch(function (error) {
+          reject(error);
+        });
+    } catch (err) {
+      console.log(err);
+    }
+  });
+}
+
+exports.signInUser = (email, password) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const mgmtTkn = await getMgmtAccessToken();
+      var options = {
+        method: "POST",
+        url: `https://${authConfig.domain}/oauth/token`,
+        headers: { "content-type": "application/x-www-form-urlencoded" },
+        data: new URLSearchParams({
+          grant_type: "password",
+          username: email,
+          password: password,
+          audience: authConfig.audience,
+          scope: "openid profile email",
+          client_id: authConfig.clientId,
+          client_secret: authConfig.clientSecret,
+        }),
+      };
+      axios
+        .request(options)
+        .then(function (response) {
+          resolve(response.data);
+        })
+        .catch(function (error) {
+          reject(error);
+        });
+    } catch (err) {
+      console.log(err);
+    }
+  });
+}
+
+exports.signOutUser = (refresh_token) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const mgmtTkn = await getMgmtAccessToken();
+      var options = {
+        method: "POST",
+        url: `https://${authConfig.domain}/oauth/revoke`,
+        headers: { "content-type": "application/x-www-form-urlencoded" },
+        data: new URLSearchParams({
+          client_id: authConfig.clientId,
+          client_secret: authConfig.clientSecret,
+          token: refresh_token,
+        }),
+      };
+      axios
+        .request(options)
+        .then(function (response) {
+          resolve(response.data);
+        })
+        .catch(function (error) {
+          reject(error);
+        });
+    } catch (err) {
+      console.log(err);
+    }
+  });
+}
