@@ -2,6 +2,7 @@ const { expressjwt: jwt } = require("express-jwt");
 const jwksRsa = require("jwks-rsa");
 const jwtAuthz = require("express-jwt-authz");
 var axios = require("axios").default;
+const User = require("../models/User.model");
 
 const authConfig = {
   domain: "dev-7om2074of27y7qj5.jp.auth0.com",
@@ -61,7 +62,7 @@ exports.updateUserMetadata = (user_id, metadata) => {
   return new Promise(async (resolve, reject) => {
     try {
       const mgmtTkn = await getMgmtAccessToken();
-
+      const user = await User.findOne({ user_id: user_id });
       var options = {
         method: "PATCH",
         url: `https://${authConfig.domain}/api/v2/users/${user_id}`,
@@ -77,10 +78,16 @@ exports.updateUserMetadata = (user_id, metadata) => {
       axios
         .request(options)
         .then(function () {
-          updateUserTags(user_id, mgmtTkn.access_token, [
-            "rol_eT51wzWKWT7IvDXF",
-          ])
-            .then(resolve)
+          updateUserTags(
+            user_id,
+            mgmtTkn.access_token,
+            user.role == "CLIENT" ? ["rol_eT51wzWKWT7IvDXF"] : []
+          )
+            .then(async () => {
+              user.role = user.role == "CLIENT" ? "EXPERT" : "CLIENT";
+              await user.save();
+              resolve();
+            })
             .catch(reject);
         })
         .catch(function (error) {
