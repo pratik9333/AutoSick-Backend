@@ -11,13 +11,8 @@ const FAQSchema = new mongoose.Schema({
     maxlength: [150, "Description is too long"],
     required: [true, "Description is required"],
   },
-  body: {
-    type: String,
-    required: [true, "FAQ Body is required"],
-  },
-  tags: [{ type: mongoose.Schema.ObjectId, ref: "Tag" }],
-  upvotes: { type: Number, default: 0, select: false },
-  downvotes: { type: Number, default: 0, select: false },
+  photo: { id: { type: String }, url: { type: String } },
+  votes: { type: Number, default: 0, select: false },
   comments: [
     {
       user: { type: mongoose.Schema.ObjectId, ref: "User" },

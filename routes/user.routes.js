@@ -1,7 +1,7 @@
-const { updateProfile } = require('../controllers/user.controller');
-const { authorizeAccessToken } = require('../utils/auth.config');
-const router = require('express').Router();
+const router = require("express").Router();
+const { updateProfile } = require("../controllers/user.controller");
+const { authorizeAccessToken } = require("../utils/auth.config");
 
-router.put('/profile', updateProfile);
+router.put("/profile", updateProfile);
 
 module.exports = router;
