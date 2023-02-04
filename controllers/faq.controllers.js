@@ -1,3 +1,4 @@
+const Comment = require("../models/Comment.model");
 const Forum = require("../models/FAQ.model");
 
 const {
@@ -7,7 +8,7 @@ const {
 
 exports.createQuestion = async (req, res) => {
   try {
-    const { question, description } = req.body;
+    const { question, description, userid } = req.body;
 
     if (!question || !description) {
       res.status(400).json({ error: "All fields are required" });
@@ -16,6 +17,8 @@ exports.createQuestion = async (req, res) => {
     if (req.files) {
       req.body.photo = await uploadPhotoAndReturnUrl();
     }
+
+    req.body.user = userid;
 
     const Question = await Forum.create(req.body);
 
@@ -132,7 +135,7 @@ exports.getQuestions = async (req, res) => {
 
 exports.addVoteToQuestion = async (req, res) => {
   try {
-    const { vote } = req.body;
+    const { vote, userid } = req.body;
     const { questionID } = req.params;
 
     if (vote === undefined) {
@@ -148,7 +151,8 @@ exports.addVoteToQuestion = async (req, res) => {
     }
 
     if (vote) {
-      getQuestion.votes = getQuestion.votes + 1;
+      getQuestion.votes.user.push({ user: userid });
+      getQuestion.votes += 1;
     }
 
     await getQuestion.save();
@@ -162,9 +166,35 @@ exports.addVoteToQuestion = async (req, res) => {
   }
 };
 
+exports.getQuestion = async (req, res) => {
+  try {
+    const { questionID } = req.params;
+
+    if (!questionID) {
+      res.status(400).json({ error: "Please provide your question id" });
+    }
+
+    const getQuestion = await Forum.findById(questionID);
+
+    if (!getQuestion) {
+      res.status(400).json({
+        error: "No question was found, please check your question id",
+      });
+    }
+
+    const questionComments = Comment.find({ forum: getQuestion._id });
+
+    res
+      .status(200)
+      .json({ success: true, question: { getQuestion, questionComments } });
+  } catch (error) {
+    res.status(500).json({ error: "Server error, please try again later" });
+  }
+};
+
 exports.addCommentToQuestion = async (req, res) => {
   try {
-    const { comment } = req.body;
+    const { comment, userid } = req.body;
     const { questionID } = req.params;
 
     if (!comment) {
@@ -181,7 +211,11 @@ exports.addCommentToQuestion = async (req, res) => {
       });
     }
 
-    getQuestion.comments.push({ user: "1212121212", comment });
+    await Comment.create({
+      user: userid,
+      comment,
+      forum: getQuestion._id,
+    });
 
     await getQuestion.save();
 

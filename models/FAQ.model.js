@@ -6,22 +6,18 @@ const FAQSchema = new mongoose.Schema({
     maxlength: [70, "Question is too long"],
     required: [true, "Question is required"],
   },
+  user: { type: mongoose.Schema.ObjectId, ref: "User" },
   description: {
     type: String,
     maxlength: [150, "Description is too long"],
     required: [true, "Description is required"],
   },
   photo: { id: { type: String }, url: { type: String } },
-  votes: { type: Number, default: 0, select: false },
-  comments: [
-    {
-      user: { type: mongoose.Schema.ObjectId, ref: "User" },
-      comment: {
-        type: String,
-        required: [true, "Comment is required"],
-      },
-    },
-  ],
+  votes: {
+    type: Number,
+    user: [{ type: mongoose.Schema.ObjectId, ref: "User" }],
+    default: 0,
+  },
 });
 
 module.exports = mongoose.model("FAQ", FAQSchema);

@@ -17,16 +17,11 @@ const blogSchema = new mongoose.Schema({
     type: String,
     required: [true, "Blog Body is required"],
   },
-  likes: { type: Number, default: 0 },
-  comments: [
-    {
-      user: { type: mongoose.Schema.ObjectId, ref: "User" },
-      comment: {
-        type: String,
-        required: [true, "Comment is required"],
-      },
-    },
-  ],
+  likes: {
+    type: Number,
+    user: [{ type: mongoose.Schema.ObjectId, ref: "User" }],
+    default: 0,
+  },
 });
 
 module.exports = mongoose.model("Blog", blogSchema);

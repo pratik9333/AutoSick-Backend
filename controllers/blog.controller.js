@@ -1,4 +1,5 @@
 const Blog = require("../models/Blog.model");
+const Comment = require("../models/Comment.model");
 
 const {
   uploadPhotoAndReturnUrl,
@@ -7,7 +8,7 @@ const {
 
 exports.createBlog = async (req, res) => {
   try {
-    const { title, description, body } = req.body;
+    const { title, description, body, userid } = req.body;
 
     if (!title || !description || !body) {
       res.status(400).json({ error: "All fields are required" });
@@ -16,6 +17,8 @@ exports.createBlog = async (req, res) => {
     if (req.files) {
       req.body.photo = await uploadPhotoAndReturnUrl();
     }
+
+    req.body.user = userid;
 
     const blog = await Blog.create(req.body);
 
@@ -130,8 +133,36 @@ exports.getBlogs = async (req, res) => {
   }
 };
 
+exports.getBlog = async (req, res) => {
+  try {
+    const { blogid } = req.params;
+
+    if (!blogid) {
+      res.status(400).json({ error: "Blog id is required" });
+    }
+
+    const getBlog = await Blog.findById(blogid);
+
+    if (!getBlog) {
+      res
+        .status(400)
+        .json({ error: "No blog was found, please checkb your blog id" });
+    }
+
+    const blogComments = Comment.find({ blog: getBlog._id });
+
+    return res.status(200).json({
+      success: true,
+      blog: { getBlog, blogComments },
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Server error, please try again later" });
+  }
+};
+
 exports.addLikeToBlog = async (req, res) => {
   try {
+    const { userid } = req.body;
     const blog = await Blog.findById(req.params.blogid);
 
     if (!blog) {
@@ -140,7 +171,8 @@ exports.addLikeToBlog = async (req, res) => {
         .json({ error: "Blog not found, please check blog id" });
     }
 
-    blog.likes = blog.likes + 1;
+    blog.likes.user.push({ user: userid });
+    blog.likes += 1;
 
     await blog.save();
 
@@ -152,7 +184,7 @@ exports.addLikeToBlog = async (req, res) => {
 
 exports.addCommentsToBlog = async (req, res) => {
   try {
-    const { comment } = req.body;
+    const { comment, userid } = req.body;
     const { blogid } = req.params;
 
     if (!comment) {
@@ -169,9 +201,7 @@ exports.addCommentsToBlog = async (req, res) => {
         .json({ error: "Blog not found, please check blog id" });
     }
 
-    blog.comments.push({ user: "1212121212", comment });
-
-    await blog.save();
+    await Comment.create({ user: userid, comment, blog: blog._id });
 
     res.status(200).json({ success: true, message: "your comment was added!" });
   } catch (error) {
