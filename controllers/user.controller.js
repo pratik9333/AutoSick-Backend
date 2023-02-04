@@ -30,6 +30,8 @@ exports.getProfile = (req, res, next) => {
 		});	
 };
 
+export.
+
 exports.postAppointment = (req, res, next) => {};
 
 exports.getAppointment = (req, res, next) => {};
