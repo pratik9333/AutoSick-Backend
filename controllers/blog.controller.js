@@ -146,7 +146,7 @@ exports.getBlog = async (req, res) => {
     if (!getBlog) {
       res
         .status(400)
-        .json({ error: "No blog was found, please checkb your blog id" });
+        .json({ error: "No blog was found, please check your blog id" });
     }
 
     const blogComments = Comment.find({ blog: getBlog._id });
@@ -169,6 +169,14 @@ exports.addLikeToBlog = async (req, res) => {
       return res
         .status(400)
         .json({ error: "Blog not found, please check blog id" });
+    }
+
+    for (let userID of blog.likes.user) {
+      if (userID.toString() === userid) {
+        return res
+          .status(400)
+          .json({ error: "You have already liked this blog" });
+      }
     }
 
     blog.likes.user.push({ user: userid });
@@ -199,6 +207,14 @@ exports.addCommentsToBlog = async (req, res) => {
       return res
         .status(400)
         .json({ error: "Blog not found, please check blog id" });
+    }
+
+    const checkUsercomment = await Comment.find({ user: userid, blog: blogid });
+
+    if (checkUsercomment) {
+      return res
+        .status(400)
+        .json({ error: "you have already commented this blog" });
     }
 
     await Comment.create({ user: userid, comment, blog: blog._id });

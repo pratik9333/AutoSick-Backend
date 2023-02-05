@@ -150,6 +150,14 @@ exports.addVoteToQuestion = async (req, res) => {
       });
     }
 
+    for (let userID of blog.votes.user) {
+      if (userID.toString() === userid) {
+        return res
+          .status(400)
+          .json({ error: "You have already voted this blog" });
+      }
+    }
+
     if (vote) {
       getQuestion.votes.user.push({ user: userid });
       getQuestion.votes += 1;
@@ -209,6 +217,17 @@ exports.addCommentToQuestion = async (req, res) => {
       res.status(400).json({
         error: "No question was found, please check your question id",
       });
+    }
+
+    const checkUsercomment = await Comment.find({
+      user: userid,
+      forum: questionID,
+    });
+
+    if (checkUsercomment) {
+      return res
+        .status(400)
+        .json({ error: "you have already commented in this question" });
     }
 
     await Comment.create({
