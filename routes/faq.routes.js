@@ -5,18 +5,18 @@ const {
   deleteQuestion,
   getQuestions,
 } = require("../controllers/faq.controller");
-const { authorizeAccessToken } = require("../utils/auth.config");
+const { isLoggedIn } = require("../middlewares/checkLoginStatus.middleware");
 
-router.post("/", createQuestion);
+router.post("/", isLoggedIn, createQuestion);
 
-router.put("/:questionID", updateQuestion);
+router.put("/:questionID", isLoggedIn, updateQuestion);
 
-router.delete("/:questionID", deleteQuestion);
+router.delete("/:questionID", isLoggedIn, deleteQuestion);
 
 router.get("/", getQuestions);
 
-router.put("/vote/:questionID", addVoteToQuestion);
+router.put("/vote/:questionID", isLoggedIn, addVoteToQuestion);
 
-router.put("/comment/:questionID", addCommentToQuestion);
+router.put("/comment/:questionID", isLoggedIn, addCommentToQuestion);
 
 module.exports = router;
