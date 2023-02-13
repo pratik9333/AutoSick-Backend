@@ -1,19 +1,23 @@
-const { loginWithGoogle, signOut } = require("../controllers/user.controller");
+const { signout, loginSuccess } = require("../controllers/auth.controllers");
 const router = require("express").Router();
 const passport = require("passport");
+
+router.get("/login/success", loginSuccess);
 
 router.get(
   "/google",
   passport.authenticate("google", {
     scope: ["profile", "email"],
-  }),
-  loginWithGoogle
+    failureRedirect: "http://localhost:3001",
+    failureMessage: "some error occured",
+  })
 );
 
-router.get("/logout", signOut);
+router.get("/logout", signout);
 
-router.get("/google/callback", passport.authenticate("google"));
-
-module.exports = router;
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { successRedirect: "http://localhost:3001" })
+);
 
 module.exports = router;

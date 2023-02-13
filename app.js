@@ -5,9 +5,12 @@ const app = express();
 const fileUpload = require("express-fileupload");
 const cors = require("cors");
 
-const passportConfig = require("./passport/passport");
 const passport = require("passport");
 const cookieSession = require("cookie-session");
+
+const { isLoggedIn } = require("./middlewares/checkLoginStatus.middleware");
+
+require("./passport/passport");
 
 // middlewares
 app.use(
@@ -17,9 +20,22 @@ app.use(
   })
 );
 
+// ejs setup
+app.set("view engine", "ejs");
+
+// initalize passport
 app.use(passport.initialize());
+
+// deserialize cookie from the browser
 app.use(passport.session());
-app.use(cors());
+
+app.use(
+  cors({
+    origin: "http://localhost:3001", // allow to server to accept request from different origin
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    credentials: true, // allow session cookie from browser to pass through
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -29,9 +45,8 @@ app.use(
   })
 );
 
-// home route
-app.get("/", (req, res) => {
-  res.send("<h1> Welcome to our api! </h1>");
+app.get("/", isLoggedIn, (req, res) => {
+  res.render("home");
 });
 
 db.connect()
