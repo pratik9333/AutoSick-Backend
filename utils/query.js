@@ -1,13 +1,14 @@
 class Query {
-  constructor(base, bigQ) {
+  constructor(base, bigQ, searchKey) {
     this.base = base;
     this.bigQ = bigQ;
+    this.searchKey = searchKey;
   }
 
   search() {
     const searchword = this.bigQ.search
       ? {
-          name: {
+          [this.searchKey]: {
             $regex: this.bigQ.search,
             $options: "i",
           },

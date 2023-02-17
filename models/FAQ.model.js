@@ -14,9 +14,11 @@ const FAQSchema = new mongoose.Schema({
   },
   photo: { id: { type: String }, url: { type: String } },
   votes: {
-    type: Number,
-    user: [{ type: mongoose.Schema.ObjectId, ref: "User" }],
-    default: 0,
+    totalVotes: {
+      type: Number,
+      default: 0,
+    },
+    user: [],
   },
 });
 

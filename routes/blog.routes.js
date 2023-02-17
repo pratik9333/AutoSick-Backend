@@ -6,20 +6,21 @@ const {
   getBlogs,
   addCommentsToBlog,
   addLikeToBlog,
+  getBlog,
 } = require("../controllers/blog.controller");
 
-const { isLoggedIn } = require("../middlewares/checkLoginStatus.middleware");
+router.post("/", createBlog);
 
-router.post("/", isLoggedIn, createBlog);
+router.put("/:blogid", updateBlog);
 
-router.put("/:blogid", isLoggedIn, updateBlog);
-
-router.delete("/:blogid", isLoggedIn, deleteBlog);
+router.delete("/:blogid", deleteBlog);
 
 router.get("/", getBlogs);
 
-router.put("/like/:blogid", isLoggedIn, addLikeToBlog);
+router.get("/:blogid", getBlog);
 
-router.put("/comment/:blogid", isLoggedIn, addCommentsToBlog);
+router.put("/like/:blogid", addLikeToBlog);
+
+router.put("/comment/:blogid", addCommentsToBlog);
 
 module.exports = router;

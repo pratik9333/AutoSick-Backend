@@ -6,7 +6,6 @@ const blogSchema = new mongoose.Schema({
     maxlength: [70, "Question is too long"],
     required: [true, "Question is required"],
   },
-  photo: { id: { type: String }, url: { type: String } },
   user: { type: mongoose.Schema.ObjectId, ref: "User" },
   description: {
     type: String,
@@ -17,10 +16,13 @@ const blogSchema = new mongoose.Schema({
     type: String,
     required: [true, "Blog Body is required"],
   },
+  photo: {
+    id: { type: String },
+    url: { type: String },
+  },
   likes: {
-    type: Number,
-    user: [{ type: mongoose.Schema.ObjectId, ref: "User" }],
-    default: 0,
+    totalLikes: { type: Number, default: 0 },
+    user: [],
   },
 });
 

@@ -59,10 +59,12 @@ db.connect()
 const userRoutes = require("./routes/user.routes");
 const blogRoutes = require("./routes/blog.routes");
 const authRoutes = require("./routes/auth.routes");
+const forumRoutes = require("./routes/faq.routes");
 
 //router middleware
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/blog", blogRoutes);
+app.use("/api/v1/forum", forumRoutes);
 
 module.exports = app;
