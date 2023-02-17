@@ -5,7 +5,7 @@
 	"license": "MIT",
 	"scripts": {
 		"dev": "NODE_ENV=development nodemon server.js",
-		"start": "node server.js",
+		"start": "NODE_ENV=production node server.js",
 		"test": "NODE_ENV=test mocha test/*test.js --recursive --exit"
 	},
 	"dependencies": {

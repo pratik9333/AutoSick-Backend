@@ -67,4 +67,8 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/blog", blogRoutes);
 app.use("/api/v1/forum", forumRoutes);
 
+app.get("/", (req, res) => {
+  res.json({ message: "Hello from our api" });
+});
+
 module.exports = app;
