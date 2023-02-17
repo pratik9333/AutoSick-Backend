@@ -4,7 +4,11 @@ const {
   updateQuestion,
   deleteQuestion,
   getQuestions,
+  addCommentToQuestion,
+  addVoteToQuestion,
+  getQuestion,
 } = require("../controllers/faq.controller");
+
 const { isLoggedIn } = require("../middlewares/checkLoginStatus.middleware");
 
 router.post("/", isLoggedIn, createQuestion);
@@ -16,6 +20,9 @@ router.delete("/:questionID", isLoggedIn, deleteQuestion);
 router.get("/", getQuestions);
 
 router.get("/:questionID", getQuestion);
+
+router.put("/vote/:questionID", addVoteToQuestion);
+
 
 router.put("/vote/:questionID", isLoggedIn, addVoteToQuestion);
 

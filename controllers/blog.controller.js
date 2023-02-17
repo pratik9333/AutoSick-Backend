@@ -1,5 +1,6 @@
 const Blog = require("../models/Blog.model");
 const Comment = require("../models/Comment.model");
+const Query = require("../utils/query");
 
 const {
   uploadPhotoAndReturnUrl,
@@ -15,7 +16,7 @@ exports.createBlog = async (req, res) => {
     }
 
     if (req.files) {
-      req.body.photo = await uploadPhotoAndReturnUrl();
+      req.body.photo = await uploadPhotoAndReturnUrl("blogs", req, res);
     }
 
     req.body.user = userid;
@@ -28,38 +29,33 @@ exports.createBlog = async (req, res) => {
       blog,
     });
   } catch (error) {
-    res.status(500).json({ error: "Server error, please try again later" });
+    console.log(error);
+    res.status(500).json({ error: "Server, please try again later" });
   }
 };
 
 exports.updateBlog = async (req, res) => {
+  const { title, description, body } = req.body;
+
+  if (!title || !description || !body) {
+    res.status(400).json({ error: "All fields are required" });
+  }
+
   try {
-    const { title, description, body } = req.body;
-
-    if (!title || !description || !body) {
-      res.status(400).json({ error: "All fields are required" });
-    }
-
     const getBlog = await Blog.findById(req.params.blogid);
 
     if (!getBlog) {
       res
         .status(400)
-        .json({ error: "No blog was found, please checkb your blog id" });
+        .json({ error: "No blog was found, please check your blog id" });
     }
 
     if (req.files) {
-      try {
-        if (getBlog.photo.id) {
-          await deletePhoto(getBlog.photo.id);
-        }
-
-        req.body.photo = await uploadPhotoAndReturnUrl();
-      } catch (error) {
-        res
-          .status(500)
-          .json({ error: "Photo failed to upload, please try again" });
+      if (getBlog.photo.id) {
+        await deletePhoto(getBlog.photo.id);
       }
+
+      req.body.photo = await uploadPhotoAndReturnUrl("blogs", req, res);
     }
 
     const updatedBlog = await Blog.findByIdAndUpdate(
@@ -114,7 +110,7 @@ exports.getBlogs = async (req, res) => {
     const resultPerPage = 8;
 
     //creating object from our custom class and passing base = User.find(), bigQ = req.query
-    const blogObj = new Query(Blog.find(), req.query);
+    const blogObj = new Query(Blog.find(), req.query, "title");
 
     blogObj.search();
     blogObj.pager(resultPerPage);
@@ -129,6 +125,7 @@ exports.getBlogs = async (req, res) => {
       filteredBlogs: filteredBlogs,
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Server error, please try again later" });
   }
 };
@@ -172,20 +169,21 @@ exports.addLikeToBlog = async (req, res) => {
     }
 
     for (let userID of blog.likes.user) {
-      if (userID.toString() === userid) {
+      if (userID.userid.toString() === userid) {
         return res
           .status(400)
           .json({ error: "You have already liked this blog" });
       }
     }
 
-    blog.likes.user.push({ user: userid });
-    blog.likes += 1;
+    blog.likes.user.push({ userid });
+    blog.likes.totalLikes += 1;
 
     await blog.save();
 
     res.status(200).json({ success: true, message: "Liked!" });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Server error, please try again later" });
   }
 };
@@ -211,7 +209,7 @@ exports.addCommentsToBlog = async (req, res) => {
 
     const checkUsercomment = await Comment.find({ user: userid, blog: blogid });
 
-    if (checkUsercomment) {
+    if (checkUsercomment.length !== 0) {
       return res
         .status(400)
         .json({ error: "you have already commented this blog" });
@@ -220,6 +218,24 @@ exports.addCommentsToBlog = async (req, res) => {
     await Comment.create({ user: userid, comment, blog: blog._id });
 
     res.status(200).json({ success: true, message: "your comment was added!" });
+  } catch (error) {
+    res.status(500).json({ error: "Server error, please try again later" });
+  }
+};
+
+exports.getBlog = async (req, res) => {
+  try {
+    const blog = await Blog.findById(req.params.blogid).select("+photo");
+
+    if (!blog) {
+      return res
+        .status(400)
+        .json({ error: "Blog not found, please check blog id" });
+    }
+
+    const comments = await Comment.find({ blog: blog._id });
+
+    return res.status(200).json({ blog, comments });
   } catch (error) {
     res.status(500).json({ error: "Server error, please try again later" });
   }

@@ -8,6 +8,8 @@ const cors = require("cors");
 const passport = require("passport");
 const cookieSession = require("cookie-session");
 
+const { isLoggedIn } = require("./middlewares/checkLoginStatus.middleware");
+
 require("./passport/passport");
 
 // middlewares
@@ -17,6 +19,7 @@ app.use(
     keys: [process.env.SECRET_KEY],
   })
 );
+
 
 // initalize passport
 app.use(passport.initialize());
@@ -46,17 +49,20 @@ db.connect()
   })
   .catch(console.log);
 
-app.get("/", (req, res) => {
-  res.json({ message: "Hello from our api" });
-});
 
 // importing all routes
 const userRoutes = require("./routes/user.routes");
 const blogRoutes = require("./routes/blog.routes");
+const authRoutes = require("./routes/auth.routes");
+const forumRoutes = require("./routes/faq.routes");
 
 //router middleware
+app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/blog", blogRoutes);
 app.use("/api/v1/forum", forumRoutes);
 
+app.get("/", (req, res) => {
+  res.json({ message: "Hello from our api" });
+});
 module.exports = app;

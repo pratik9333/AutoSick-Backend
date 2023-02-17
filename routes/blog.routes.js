@@ -6,7 +6,9 @@ const {
   getBlogs,
   addCommentsToBlog,
   addLikeToBlog,
+  getBlog,
 } = require("../controllers/blog.controller");
+
 const { isLoggedIn } = require("../middlewares/checkLoginStatus.middleware");
 
 router.post("/", isLoggedIn, createBlog);
@@ -18,6 +20,8 @@ router.delete("/:blogid", isLoggedIn, deleteBlog);
 router.get("/", getBlogs);
 
 router.get("/:blogid", getBlog);
+
+router.put("/like/:blogid", addLikeToBlog);
 
 router.put("/like/:blogid", isLoggedIn, addLikeToBlog);
 
