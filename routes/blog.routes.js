@@ -7,18 +7,20 @@ const {
   addCommentsToBlog,
   addLikeToBlog,
 } = require("../controllers/blog.controller");
-const { authorizeAccessToken } = require("../utils/auth.config");
+const { isLoggedIn } = require("../middlewares/checkLoginStatus.middleware");
 
-router.post("/", createBlog);
+router.post("/", isLoggedIn, createBlog);
 
-router.put("/:blogid", updateBlog);
+router.put("/:blogid", isLoggedIn, updateBlog);
 
-router.delete("/:blogid", deleteBlog);
+router.delete("/:blogid", isLoggedIn, deleteBlog);
 
 router.get("/", getBlogs);
 
-router.put("/like/:blogid", addLikeToBlog);
+router.get("/:blogid", getBlog);
 
-router.put("/comment/:blogid", addCommentsToBlog);
+router.put("/like/:blogid", isLoggedIn, addLikeToBlog);
+
+router.put("/comment/:blogid", isLoggedIn, addCommentsToBlog);
 
 module.exports = router;
