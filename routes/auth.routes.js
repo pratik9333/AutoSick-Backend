@@ -4,6 +4,10 @@ const passport = require("passport");
 
 router.get("/login/success", loginSuccess);
 
+// router.get("/login", (req, res) => {
+//   res.render("login");
+// });
+
 router.get(
   "/google",
   passport.authenticate("google", {
@@ -17,7 +21,7 @@ router.get("/logout", signout);
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", { successRedirect: "http://localhost:3001" })
+  passport.authenticate("google", { successRedirect: "http://localhost:8000" })
 );
 
 module.exports = router;

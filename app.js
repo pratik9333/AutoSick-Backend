@@ -8,8 +8,6 @@ const cors = require("cors");
 const passport = require("passport");
 const cookieSession = require("cookie-session");
 
-const { isLoggedIn } = require("./middlewares/checkLoginStatus.middleware");
-
 require("./passport/passport");
 
 // middlewares
@@ -20,6 +18,7 @@ app.use(
   })
 );
 
+// app.set("view engine", "ejs");
 
 // initalize passport
 app.use(passport.initialize());
@@ -49,7 +48,6 @@ db.connect()
   })
   .catch(console.log);
 
-
 // importing all routes
 const userRoutes = require("./routes/user.routes");
 const blogRoutes = require("./routes/blog.routes");
@@ -63,6 +61,7 @@ app.use("/api/v1/blog", blogRoutes);
 app.use("/api/v1/forum", forumRoutes);
 
 app.get("/", (req, res) => {
-  res.json({ message: "Hello from our api" });
+  // res.render("Home");
+  res.status(200).json({ success: true, message: "Welcome to our api" });
 });
 module.exports = app;

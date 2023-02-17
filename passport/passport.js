@@ -16,26 +16,34 @@ passport.deserializeUser(function (id, done) {
   });
 });
 
+let domainUrl;
+if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
+  domainUrl = "http://localhost:8000/api/v1";
+} else {
+  domainUrl = "https://auto-sick-backend.vercel.app/api/v1";
+}
+
 passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: "http://localhost:8000/api/v1/auth/google/callback",
+      callbackURL: `${domainUrl}/auth/google/callback`,
     },
     async (accessToken, refreshToken, profile, next) => {
       try {
         const user = await User.findOne({ email: profile._json.email });
         if (user) {
+          //console.log("Already Created", user);
           return next(null, user);
         } else {
-          const user = await User.create({
+          const newUser = await User.create({
             name: profile.displayName,
             googleId: profile.id,
             email: profile._json.email,
             photo: profile._json.picture,
           });
-          console.log("New User", user);
+          //console.log("New User", newUser);
           next(null, user);
         }
       } catch (error) {

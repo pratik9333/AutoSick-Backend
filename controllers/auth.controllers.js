@@ -1,6 +1,6 @@
 exports.signout = (req, res) => {
   req.logout();
-  res.redirect("http://localhost:3001");
+  res.redirect("http://localhost:8000/api/v1/auth/login");
 };
 
 exports.loginSuccess = (req, res) => {
