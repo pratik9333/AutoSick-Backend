@@ -9,11 +9,13 @@ const {
   getQuestion,
 } = require("../controllers/faq.controller");
 
-router.post("/", createQuestion);
+const { isLoggedIn } = require("../middlewares/checkLoginStatus.middleware");
 
-router.put("/:questionID", updateQuestion);
+router.post("/", isLoggedIn, createQuestion);
 
-router.delete("/:questionID", deleteQuestion);
+router.put("/:questionID", isLoggedIn, updateQuestion);
+
+router.delete("/:questionID", isLoggedIn, deleteQuestion);
 
 router.get("/", getQuestions);
 
@@ -21,6 +23,9 @@ router.get("/:questionID", getQuestion);
 
 router.put("/vote/:questionID", addVoteToQuestion);
 
-router.put("/comment/:questionID", addCommentToQuestion);
+
+router.put("/vote/:questionID", isLoggedIn, addVoteToQuestion);
+
+router.put("/comment/:questionID", isLoggedIn, addCommentToQuestion);
 
 module.exports = router;

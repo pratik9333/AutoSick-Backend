@@ -20,8 +20,6 @@ app.use(
   })
 );
 
-// ejs setup
-app.set("view engine", "ejs");
 
 // initalize passport
 app.use(passport.initialize());
@@ -45,15 +43,12 @@ app.use(
   })
 );
 
-app.get("/", isLoggedIn, (req, res) => {
-  res.render("home");
-});
-
 db.connect()
   .then(() => {
     console.log("Database connected!");
   })
   .catch(console.log);
+
 
 // importing all routes
 const userRoutes = require("./routes/user.routes");
@@ -70,5 +65,4 @@ app.use("/api/v1/forum", forumRoutes);
 app.get("/", (req, res) => {
   res.json({ message: "Hello from our api" });
 });
-
 module.exports = app;

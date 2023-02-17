@@ -9,11 +9,13 @@ const {
   getBlog,
 } = require("../controllers/blog.controller");
 
-router.post("/", createBlog);
+const { isLoggedIn } = require("../middlewares/checkLoginStatus.middleware");
 
-router.put("/:blogid", updateBlog);
+router.post("/", isLoggedIn, createBlog);
 
-router.delete("/:blogid", deleteBlog);
+router.put("/:blogid", isLoggedIn, updateBlog);
+
+router.delete("/:blogid", isLoggedIn, deleteBlog);
 
 router.get("/", getBlogs);
 
@@ -21,6 +23,8 @@ router.get("/:blogid", getBlog);
 
 router.put("/like/:blogid", addLikeToBlog);
 
-router.put("/comment/:blogid", addCommentsToBlog);
+router.put("/like/:blogid", isLoggedIn, addLikeToBlog);
+
+router.put("/comment/:blogid", isLoggedIn, addCommentsToBlog);
 
 module.exports = router;
