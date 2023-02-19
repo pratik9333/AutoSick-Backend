@@ -53,6 +53,7 @@ const userRoutes = require("./routes/user.routes");
 const blogRoutes = require("./routes/blog.routes");
 const authRoutes = require("./routes/auth.routes");
 const forumRoutes = require("./routes/faq.routes");
+const { isLoggedIn } = require("./middlewares/checkLoginStatus.middleware");
 
 //router middleware
 app.use("/api/v1/auth", authRoutes);
@@ -60,8 +61,8 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/blog", blogRoutes);
 app.use("/api/v1/forum", forumRoutes);
 
-app.get("/", (req, res) => {
-  // res.render("Home");
+app.get("/", isLoggedIn, (req, res) => {
+  //res.render("Home");
   res.status(200).json({ success: true, message: "Welcome to our api" });
 });
 module.exports = app;

@@ -21,8 +21,20 @@
     </div>
     <div class="container mt-4">
         <a href="/api/v1/auth/google" class="btn btn-danger">google</a>
-
     </div>
+    Login
+    <form action="/api/v1/auth/login" method="post">
+        <input type="text" name="username">
+        <input type="password" name="password">
+        <button type="submit">Submit</button>
+    </form>
+
+    Signup
+    <form action="/api/v1/auth/signup" method="post">
+        <input type="text" name="username">
+        <input type="password" name="password">
+        <button type="submit">Submit</button>
+    </form>
 </body>
 
 </html>

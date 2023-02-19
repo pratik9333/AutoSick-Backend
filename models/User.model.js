@@ -4,7 +4,6 @@ const userSchema = new mongoose.Schema({
   name: {
     type: String,
     maxlength: [40, "User name is too long"],
-    required: [true, "Name is required"],
   },
   googleId: String,
   email: {
@@ -22,6 +21,9 @@ const userSchema = new mongoose.Schema({
     type: Number,
   },
   expertiseIn: String,
+  password: {
+    type: String,
+  },
   role: {
     type: String,
     enum: ["user", "expert"],

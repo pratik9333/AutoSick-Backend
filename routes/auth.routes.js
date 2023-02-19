@@ -4,9 +4,27 @@ const passport = require("passport");
 
 router.get("/login/success", loginSuccess);
 
-// router.get("/login", (req, res) => {
-//   res.render("login");
-// });
+router.post(
+  "/signup",
+  passport.authenticate("local-signup", {
+    successRedirect: "/",
+    failureRedirect: "/api/v1/auth/login",
+    failureFlash: true,
+  })
+);
+
+router.post(
+  "/login",
+  passport.authenticate("local", {
+    successRedirect: "/",
+    failureRedirect: "/api/v1/auth/login",
+    failureFlash: true,
+  })
+);
+
+router.get("/login", (req, res) => {
+  res.render("login");
+});
 
 router.get(
   "/google",

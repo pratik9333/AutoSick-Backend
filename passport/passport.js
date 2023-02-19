@@ -2,6 +2,16 @@ const passport = require("passport");
 const User = require("../models/User.model");
 
 var GoogleStrategy = require("passport-google-oauth20").Strategy;
+const LocalStrategy = require("passport-local").Strategy;
+
+const bcrypt = require("bcryptjs");
+
+let domainUrl;
+if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
+  domainUrl = "http://localhost:8000/api/v1";
+} else {
+  domainUrl = "https://auto-sick-backend.vercel.app/api/v1";
+}
 
 // serialize the user.id to save in the cookie session
 // so the browser will remember the user when login
@@ -16,13 +26,50 @@ passport.deserializeUser(function (id, done) {
   });
 });
 
-let domainUrl;
-if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
-  domainUrl = "http://localhost:8000/api/v1";
-} else {
-  domainUrl = "https://auto-sick-backend.vercel.app/api/v1";
-}
+// login
+passport.use(
+  new LocalStrategy(async (email, password, next) => {
+    try {
+      const user = await User.find({ email });
+      if (user.length > 0) {
+        const result = await bcrypt.compare(password, user[0].password);
+        if (!result) {
+          return next(null, false);
+        }
+        return next(null, user[0]);
+      } else {
+        return next(null, false);
+      }
+    } catch (error) {
+      console.log(error);
+      return next(null, false);
+    }
+  })
+);
 
+// signup
+passport.use(
+  "local-signup",
+  new LocalStrategy(async (email, password, next) => {
+    try {
+      const user = await User.find({ email });
+      if (user.length !== 0) {
+        return next(null, false);
+      }
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newUser = await User.create({
+        email,
+        password: hashedPassword,
+      });
+      return next(null, newUser);
+    } catch (error) {
+      console.log(error);
+      return next(null, false);
+    }
+  })
+);
+
+// google login
 passport.use(
   new GoogleStrategy(
     {
