@@ -34,15 +34,14 @@ passport.use(
       if (user.length > 0) {
         const result = await bcrypt.compare(password, user[0].password);
         if (!result) {
-          return next(null, false);
+          return next("Password incorrect", false);
         }
         return next(null, user[0]);
       } else {
-        return next(null, false);
+        return next("Email not found", false);
       }
     } catch (error) {
-      console.log(error);
-      return next(null, false);
+      return next("Server Error, Please try again", false);
     }
   })
 );
@@ -54,7 +53,7 @@ passport.use(
     try {
       const user = await User.find({ email });
       if (user.length !== 0) {
-        return next(null, false);
+        return next("Email is already in use, please use another email", false);
       }
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = await User.create({
@@ -63,8 +62,7 @@ passport.use(
       });
       return next(null, newUser);
     } catch (error) {
-      console.log(error);
-      return next(null, false);
+      return next("Server Error, please try again", false);
     }
   })
 );
@@ -81,7 +79,6 @@ passport.use(
       try {
         const user = await User.findOne({ email: profile._json.email });
         if (user) {
-          //console.log("Already Created", user);
           return next(null, user);
         } else {
           const newUser = await User.create({
@@ -90,13 +87,11 @@ passport.use(
             email: profile._json.email,
             photo: profile._json.picture,
           });
-          //console.log("New User", newUser);
-          next(null, user);
+          next(null, newUser);
         }
       } catch (error) {
-        console.log(error);
+        return next("Server Error, please try again", false);
       }
     }
   )
 );
-//   next();
