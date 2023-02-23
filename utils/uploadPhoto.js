@@ -1,6 +1,6 @@
 const cloudinary = require("cloudinary");
 
-const uploadPhotoAndReturnUrl = async (folder, req, res) => {
+const uploadPhotoAndReturnUrl = async (folder, req) => {
   try {
     //uploading file to cloudinary
     const result = await cloudinary.v2.uploader.upload(
@@ -16,19 +16,17 @@ const uploadPhotoAndReturnUrl = async (folder, req, res) => {
       url: result.secure_url,
     };
   } catch (error) {
-    console.log(error);
-    return res
-      .status(500)
-      .json({ error: "Photo failed to upload, please try again" });
+    return false;
   }
 };
 
-const deletePhoto = async (imageId, res) => {
+const deletePhoto = async (imageId) => {
   try {
     //delete photo from cloudinary
     await cloudinary.v2.uploader.destroy(imageId);
+    return true;
   } catch (error) {
-    res.status(500).json({ error: "Photo failed to delete, please try again" });
+    return false;
   }
 };
 

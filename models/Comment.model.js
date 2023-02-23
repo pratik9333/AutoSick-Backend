@@ -11,6 +11,10 @@ const commentSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  replyingTo: {
+    type: mongoose.Schema.ObjectId,
+    ref: "User",
+  },
   blog: {
     type: mongoose.Schema.ObjectId,
     ref: "Blog",
@@ -22,3 +26,5 @@ const commentSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model("Comment", commentSchema);
+
+// sevaa250;

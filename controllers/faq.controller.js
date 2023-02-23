@@ -16,7 +16,7 @@ exports.createQuestion = async (req, res) => {
     }
 
     if (req.files) {
-      req.body.photo = await uploadPhotoAndReturnUrl("forum", req, res);
+      req.body.photo = await uploadPhotoAndReturnUrl("forum", req);
     }
 
     req.body.user = userid;
@@ -54,7 +54,7 @@ exports.updateQuestion = async (req, res) => {
         await deletePhoto(getQuestion.photo.id);
       }
 
-      req.body.photo = await uploadPhotoAndReturnUrl("forum", req, res);
+      req.body.photo = await uploadPhotoAndReturnUrl("forum", req);
     }
 
     const updatedQuestion = await Forum.findByIdAndUpdate(

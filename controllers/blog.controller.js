@@ -9,17 +9,17 @@ const {
 
 exports.createBlog = async (req, res) => {
   try {
-    const { title, description, body, userid } = req.body;
+    const { title, description, body } = req.body;
 
     if (!title || !description || !body) {
       res.status(400).json({ error: "All fields are required" });
     }
 
     if (req.files) {
-      req.body.photo = await uploadPhotoAndReturnUrl("blogs", req, res);
+      req.body.photo = await uploadPhotoAndReturnUrl("blogs", req);
     }
 
-    req.body.user = userid;
+    req.body.user = req.user._id;
 
     const blog = await Blog.create(req.body);
 
@@ -35,17 +35,17 @@ exports.createBlog = async (req, res) => {
 };
 
 exports.updateBlog = async (req, res) => {
-  const { title, description, body } = req.body;
-
-  if (!title || !description || !body) {
-    res.status(400).json({ error: "All fields are required" });
-  }
-
   try {
+    const { title, description, body } = req.body;
+
+    if (!title || !description || !body) {
+      res.status(400).json({ error: "All fields are required" });
+    }
+
     const getBlog = await Blog.findById(req.params.blogid);
 
     if (!getBlog) {
-      res
+      return res
         .status(400)
         .json({ error: "No blog was found, please check your blog id" });
     }
@@ -55,12 +55,19 @@ exports.updateBlog = async (req, res) => {
         await deletePhoto(getBlog.photo.id);
       }
 
-      req.body.photo = await uploadPhotoAndReturnUrl("blogs", req, res);
+      req.body.photo = await uploadPhotoAndReturnUrl("blogs", req);
+    }
+
+    if (!req.body.photo) {
+      return res
+        .status(400)
+        .json({ error: "Photo failed to upload, please try again" });
     }
 
     const updatedBlog = await Blog.findByIdAndUpdate(
       req.params.blogid,
-      req.body
+      req.body,
+      { new: true }
     );
 
     return res.status(200).json({
@@ -159,7 +166,6 @@ exports.getBlog = async (req, res) => {
 
 exports.addLikeToBlog = async (req, res) => {
   try {
-    const { userid } = req.body;
     const blog = await Blog.findById(req.params.blogid);
 
     if (!blog) {
@@ -169,7 +175,7 @@ exports.addLikeToBlog = async (req, res) => {
     }
 
     for (let userID of blog.likes.user) {
-      if (userID.userid.toString() === userid) {
+      if (userID.userid.toString() === req.user._id.toString()) {
         return res
           .status(400)
           .json({ error: "You have already liked this blog" });
@@ -190,13 +196,13 @@ exports.addLikeToBlog = async (req, res) => {
 
 exports.addCommentsToBlog = async (req, res) => {
   try {
-    const { comment, userid } = req.body;
+    const { comment, replyingTo = null } = req.body;
     const { blogid } = req.params;
 
     if (!comment) {
-      return res
-        .status(400)
-        .json({ error: "Please provide your comment, it cannot be empty" });
+      return res.status(400).json({
+        error: "Please provide comment and user id, it cannot be empty",
+      });
     }
 
     const blog = await Blog.findById(blogid);
@@ -207,18 +213,16 @@ exports.addCommentsToBlog = async (req, res) => {
         .json({ error: "Blog not found, please check blog id" });
     }
 
-    const checkUsercomment = await Comment.find({ user: userid, blog: blogid });
-
-    if (checkUsercomment.length !== 0) {
-      return res
-        .status(400)
-        .json({ error: "you have already commented this blog" });
-    }
-
-    await Comment.create({ user: userid, comment, blog: blog._id });
+    await Comment.create({
+      user: req.user._id,
+      comment,
+      blog: blog._id,
+      replyingTo: replyingTo,
+    });
 
     res.status(200).json({ success: true, message: "your comment was added!" });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Server error, please try again later" });
   }
 };
@@ -235,8 +239,14 @@ exports.getBlog = async (req, res) => {
 
     const comments = await Comment.find({ blog: blog._id });
 
-    return res.status(200).json({ blog, comments });
+    const populatedComments = await Comment.populate(comments, [
+      { path: "user", select: "name email" },
+      { path: "replyingTo", select: "name email" },
+    ]);
+
+    return res.status(200).json({ blog, comments: populatedComments });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Server error, please try again later" });
   }
 };
