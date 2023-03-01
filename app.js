@@ -18,7 +18,7 @@ app.use(
   })
 );
 
-// app.set("view engine", "ejs");
+app.set("view engine", "ejs");
 
 // initalize passport
 app.use(passport.initialize());
@@ -62,7 +62,6 @@ app.use("/api/v1/blog", blogRoutes);
 app.use("/api/v1/forum", forumRoutes);
 
 app.get("/", isLoggedIn, (req, res) => {
-  //res.render("Home");
-  res.status(200).json({ success: true, message: "Welcome to our api" });
+  res.render("Home");
 });
 module.exports = app;
