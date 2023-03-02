@@ -1,24 +1,16 @@
-const { signout, loginSuccess } = require("../controllers/auth.controllers");
+const {
+  signout,
+  loginSuccess,
+  signup,
+} = require("../controllers/auth.controllers");
 const router = require("express").Router();
 const passport = require("passport");
 
 router.get("/login/success", loginSuccess);
 
-router.post(
-  "/signup",
-  passport.authenticate("local-signup", {
-    successRedirect: "/",
-    failureFlash: true,
-  })
-);
+router.post("/signup", signup);
 
-router.post(
-  "/login",
-  passport.authenticate("local", {
-    successRedirect: "/",
-    failureFlash: true,
-  })
-);
+router.post("/login", passport.authenticate("local"));
 
 router.get("/login", (req, res) => {
   res.render("login");

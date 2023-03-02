@@ -26,13 +26,23 @@ app.use(passport.initialize());
 // deserialize cookie from the browser
 app.use(passport.session());
 
-app.use(
-  cors({
-    origin: "http://localhost:3001", // allow to server to accept request from different origin
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    credentials: true, // allow session cookie from browser to pass through
-  })
-);
+const IPWhitelist = [
+  process.env.APP_URL,
+  process.env.SERVER_URL,
+  "http://localhost:3001/",
+];
+const corsOptions = {
+  credentials: true,
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  origin: function (origin, callback) {
+    if (IPWhitelist.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(

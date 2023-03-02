@@ -23,7 +23,6 @@ router.get("/:questionID", getQuestion);
 
 router.put("/vote/:questionID", addVoteToQuestion);
 
-
 router.put("/vote/:questionID", isLoggedIn, addVoteToQuestion);
 
 router.put("/comment/:questionID", isLoggedIn, addCommentToQuestion);

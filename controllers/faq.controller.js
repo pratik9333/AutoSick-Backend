@@ -9,7 +9,7 @@ const {
 
 exports.createQuestion = async (req, res) => {
   try {
-    const { question, description, userid } = req.body;
+    const { question, description } = req.body;
 
     if (!question || !description) {
       res.status(400).json({ error: "All fields are required" });
@@ -19,7 +19,7 @@ exports.createQuestion = async (req, res) => {
       req.body.photo = await uploadPhotoAndReturnUrl("forum", req);
     }
 
-    req.body.user = userid;
+    req.body.user = req.user._id;
 
     const Question = await Forum.create(req.body);
 
@@ -34,19 +34,19 @@ exports.createQuestion = async (req, res) => {
 };
 
 exports.updateQuestion = async (req, res) => {
-  const { question, description } = req.body;
-
-  if (!question || !description) {
-    res.status(400).json({ error: "All fields are required" });
-  }
-
   try {
+    const { question, description } = req.body;
+
+    if (!question || !description) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
     const getQuestion = await Forum.findById(req.params.questionID);
 
     if (!getQuestion) {
-      res
+      return res
         .status(400)
-        .json({ error: "No blog was found, please check your blog id" });
+        .json({ error: "No blog was found, please check your question id" });
     }
 
     if (req.files) {
@@ -57,9 +57,16 @@ exports.updateQuestion = async (req, res) => {
       req.body.photo = await uploadPhotoAndReturnUrl("forum", req);
     }
 
+    if (!req.body.photo) {
+      return res
+        .status(400)
+        .json({ error: "Photo failed to upload, please try again" });
+    }
+
     const updatedQuestion = await Forum.findByIdAndUpdate(
       req.params.questionID,
-      req.body
+      req.body,
+      { new: true }
     );
 
     res.status(200).json({
@@ -74,13 +81,13 @@ exports.updateQuestion = async (req, res) => {
 };
 
 exports.deleteQuestion = async (req, res) => {
-  const { questionID } = req.params;
-
-  if (!questionID) {
-    res.status(400).json({ error: "Question id is required" });
-  }
-
   try {
+    const { questionID } = req.params;
+
+    if (!questionID) {
+      res.status(400).json({ error: "Question id is required" });
+    }
+
     const getQuestion = await Forum.findById(questionID);
 
     if (!getQuestion) {
@@ -147,8 +154,6 @@ exports.addVoteToQuestion = async (req, res) => {
       });
     }
 
-    console.log(getQuestion);
-
     for (let userID of getQuestion.votes.user) {
       if (userID.userid.toString() === userid) {
         return res
@@ -167,40 +172,13 @@ exports.addVoteToQuestion = async (req, res) => {
       message: "Question voted successfully",
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Server error, please try again later" });
-  }
-};
-
-exports.getQuestion = async (req, res) => {
-  try {
-    const { questionID } = req.params;
-
-    if (!questionID) {
-      res.status(400).json({ error: "Please provide your question id" });
-    }
-
-    const getQuestion = await Forum.findById(questionID);
-
-    if (!getQuestion) {
-      res.status(400).json({
-        error: "No question was found, please check your question id",
-      });
-    }
-
-    const questionComments = Comment.find({ forum: getQuestion._id });
-
-    res
-      .status(200)
-      .json({ success: true, question: { getQuestion, questionComments } });
-  } catch (error) {
     res.status(500).json({ error: "Server error, please try again later" });
   }
 };
 
 exports.addCommentToQuestion = async (req, res) => {
   try {
-    const { comment, userid } = req.body;
+    const { comment, replyingTo = null } = req.body;
     const { questionID } = req.params;
 
     if (!comment) {
@@ -217,24 +195,12 @@ exports.addCommentToQuestion = async (req, res) => {
       });
     }
 
-    const checkUsercomment = await Comment.find({
-      user: userid,
-      forum: questionID,
-    });
-
-    if (checkUsercomment.length !== 0) {
-      return res
-        .status(400)
-        .json({ error: "you have already commented in this question" });
-    }
-
     await Comment.create({
-      user: userid,
+      user: req.user._id,
       comment,
       forum: getQuestion._id,
+      replyingTo: replyingTo,
     });
-
-    await getQuestion.save();
 
     res.status(200).json({ success: true, message: "your comment was added!" });
   } catch (error) {
@@ -243,30 +209,34 @@ exports.addCommentToQuestion = async (req, res) => {
 };
 
 exports.getQuestion = async (req, res) => {
-  const { questionID } = req.params;
-
-  if (!questionID) {
-    return res.status(400).json({ error: "Question id is required" });
-  }
-
   try {
+    const { questionID } = req.params;
+
+    if (!questionID) {
+      return res.status(400).json({ error: "Question id is required" });
+    }
+
     const getQuestion = await Forum.findById(questionID);
 
     if (!getQuestion) {
-      return res
-        .status(400)
-        .json({ error: "No blog was found, please check your blog id" });
+      return res.status(400).json({
+        error: "No question was found, please check your question id",
+      });
     }
 
     const comments = await Comment.find({ forum: getQuestion._id });
 
+    const populatedComments = await Comment.populate(comments, [
+      { path: "user", select: "name email" },
+      { path: "replyingTo", select: "name email" },
+    ]);
+
     return res.status(200).json({
       success: true,
       getQuestion,
-      comments,
+      populatedComments,
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({ error: "Server error, please try again later" });
   }
 };

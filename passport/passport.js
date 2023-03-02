@@ -46,27 +46,6 @@ passport.use(
   })
 );
 
-// signup
-passport.use(
-  "local-signup",
-  new LocalStrategy(async (email, password, next) => {
-    try {
-      const user = await User.find({ email });
-      if (user.length !== 0) {
-        return next("Email is already in use, please use another email", false);
-      }
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const newUser = await User.create({
-        email,
-        password: hashedPassword,
-      });
-      return next(null, newUser);
-    } catch (error) {
-      return next("Server Error, please try again", false);
-    }
-  })
-);
-
 // google login
 passport.use(
   new GoogleStrategy(
