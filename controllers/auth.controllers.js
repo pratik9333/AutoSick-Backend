@@ -15,7 +15,7 @@ exports.signup = async (req, res) => {
     if (user.length !== 0) {
       return res
         .status(400)
-        .json({ error: "Email is in use, please try again later" });
+        .json({ error: "Email is in use, please use different email" });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
 

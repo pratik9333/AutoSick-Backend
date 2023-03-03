@@ -60,13 +60,10 @@ passport.use(
         if (user) {
           return next(null, user);
         } else {
-          const newUser = await User.create({
-            name: profile.displayName,
-            googleId: profile.id,
-            email: profile._json.email,
-            photo: profile._json.picture,
-          });
-          next(null, newUser);
+          return next(
+            "No user found with this email, please signup if you didn't already",
+            false
+          );
         }
       } catch (error) {
         return next("Server Error, please try again", false);
