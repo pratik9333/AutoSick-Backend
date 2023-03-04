@@ -26,6 +26,8 @@ passport.deserializeUser(function (id, done) {
   });
 });
 
+//TODO: fallback if cookie is disabled in browser
+
 // login
 passport.use(
   new LocalStrategy(async (email, password, next) => {

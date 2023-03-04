@@ -20,8 +20,6 @@ app.use(
 
 app.set("view engine", "ejs");
 
-app.set("trust proxy", 1);
-
 // initalize passport
 app.use(passport.initialize());
 
