@@ -10,7 +10,13 @@ router.get("/login/success", loginSuccess);
 
 router.post("/signup", signup);
 
-router.post("/login", passport.authenticate("local"));
+router.post(
+  "/login",
+  passport.authenticate("local", {
+    failureRedirect: "/login",
+    successRedirect: "/",
+  })
+);
 
 router.get("/login", (req, res) => {
   res.render("login");
